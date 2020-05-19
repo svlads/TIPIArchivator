@@ -34,7 +34,7 @@ class PrefixTree {
     }
   }
 
-  PrefixTree() = default;
+  PrefixTree() : values_(nullptr), root_(nullptr) {}
 
   void BuildTree();
 

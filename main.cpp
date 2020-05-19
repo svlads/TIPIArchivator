@@ -90,49 +90,54 @@ class Encoder {
 
 int main(int argc, char *argv[]) {
   if (strcmp(argv[1], "encode") == 0) {
-    char *filename = argv[2];
-    FILE *fp = fopen(filename, "r");
-    fseek(fp, 0L, SEEK_END);
-    size_t file_size = ftell(fp);
-    fseek(fp, 0L, SEEK_SET);
+    for (int i = 2; i < argc; ++i) {
+      char *filename = argv[i];
+      std::string name(filename);
+      FILE *fp = fopen(filename, "rb");
+      fseek(fp, 0L, SEEK_END);
+      size_t file_size = ftell(fp);
+      fseek(fp, 0L, SEEK_SET);
 
-    FILE *out = fopen("result", "w");
-    uint64_t freqs[256];
-    CountFreqs(fp, freqs);
-    PrefixTree tree(freqs);
-    tree.BuildTree();
-    tree.FindCodes();
-    Encoder enc(tree.GetCodes());
+      FILE *out = fopen((name + "_comp").c_str(), "wb");
+      uint64_t freqs[256];
+      CountFreqs(fp, freqs);
+      PrefixTree tree(freqs);
+      tree.BuildTree();
+      tree.FindCodes();
+      Encoder enc(tree.GetCodes());
 
-    unsigned char symbols_order[256];
+      unsigned char symbols_order[256];
 
 
-    Code code(2 * 256);
-    tree.WriteTree(code, symbols_order);
-    size_t code_size = code.GetSize();
-    size_t to_write = code_size / 8;
-    if (code_size % 8) ++to_write;
+      Code code(2 * 256);
+      tree.WriteTree(code, symbols_order);
+      size_t code_size = code.GetSize();
+      size_t to_write = code_size / 8;
+      if (code_size % 8) ++to_write;
 
-    fwrite(&code_size, 4, 1, out);
-    fwrite(symbols_order, 1, (code_size >> 1u) + 1, out);
-    fwrite(code.GetBlockPtr(0), 1, to_write, out);
-    fwrite(&file_size, 4, 1, out);
+      fwrite(&code_size, 4, 1, out);
+      fwrite(symbols_order, 1, (code_size >> 1u) + 1, out);
+      fwrite(code.GetBlockPtr(0), 1, to_write, out);
+      fwrite(&file_size, 4, 1, out);
 
-    enc.EncodeFromFile(fp, out);
-    fclose(fp);
-    fclose(out);
-    return 0;
+      enc.EncodeFromFile(fp, out);
+      fclose(fp);
+      fclose(out);
+    }
   } else if (strcmp(argv[1], "decode") == 0) {
-    char *filename = argv[2];
-    FILE *fp = fopen(filename, "r");
-    FILE *out = fopen("result2", "w");
+    for (int i = 2; i < argc; ++i) {
+      char *filename = argv[2];
+      std::string name(filename);
+      FILE *fp = fopen(filename, "rb");
+      FILE *out = fopen((name + "orig").c_str(), "wb");
 
-    PrefixTree tree;
+      PrefixTree tree;
 
-    tree.ReadTree(fp);
-    tree.Decode(fp, out);
-    fclose(fp);
-    fclose(out);
+      tree.ReadTree(fp);
+      tree.Decode(fp, out);
+      fclose(fp);
+      fclose(out);
+    }
   }
   return 0;
 }
