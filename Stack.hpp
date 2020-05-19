@@ -3,25 +3,37 @@
 
 #include <cstring>
 #include <utility>
+#include <memory>
 
 template<class T>
 class Stack {
+ private:
+  struct ListNode {
+    ListNode() {}
+
+    ListNode(T val) : value(std::move(val)), next(nullptr) {}
+
+    T value;
+    std::shared_ptr<ListNode> next;
+  };
+
+  using ListNodePtr = std::shared_ptr<ListNode>;
+
  public:
   Stack() : size_(0) {
-    root_ = NULL;
+    root_ = nullptr;
   };
 
   void Push(T value) {
-    auto *new_node = new ListNode(std::move(value));
+    // auto *new_node = new ListNode(std::move(value));
+    auto new_node = std::make_shared<ListNode>(std::move(value));
     new_node->next = root_;
-    root_ = new_node;
+    root_ = std::move(new_node);
     ++size_;
   }
 
   void Pop() {
-    auto *new_root = root_->next;
-    delete root_;
-    root_ = new_root;
+    root_ = root_->next;
     --size_;
   }
 
@@ -34,18 +46,8 @@ class Stack {
   }
 
  private:
-
-  struct ListNode {
-    ListNode() {}
-
-    ListNode(T val) : value(std::move(val)), next(NULL) {}
-
-    T value;
-    ListNode *next;
-  };
-
   size_t size_;
-  ListNode *root_;
+  ListNodePtr root_;
 };
 
 

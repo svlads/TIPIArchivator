@@ -4,12 +4,27 @@
 #include <string>
 #include <cstring>
 #include <cinttypes>
+#include <memory>
 
 #include "Code.hpp"
 
 static const int ALPHABET = 256;
 
 class PrefixTree {
+ private:
+  struct TNode {
+    using TNodePtr = std::shared_ptr<TNode>;
+    TNode(uint64_t val, TNodePtr l, TNodePtr r) : value(val), left(std::move(l)), right(std::move(r)) {}
+
+    TNode() {}
+
+    uint64_t value;
+    TNodePtr left;
+    TNodePtr right;
+    unsigned char symbol;
+  };
+  using TNodePtr = std::shared_ptr<TNode>;
+
  public:
   explicit PrefixTree(uint64_t *values) : values_(new Record[ALPHABET]), root_(nullptr) {
     for (int i = 0; i < ALPHABET; ++i) {
@@ -35,28 +50,11 @@ class PrefixTree {
 
   void Decode(FILE *in, FILE *out);
 
-  // TODO: delete nodes
   ~PrefixTree() {
     delete[] values_;
-    delete root_;
   }
 
  private:
-  struct TNode {
-    TNode(uint64_t val, TNode *l, TNode *r) : value(val), left(l), right(r) {}
-
-    TNode() {}
-
-    ~TNode() {
-      delete left;
-      delete right;
-    }
-
-    uint64_t value;
-    TNode *left;
-    TNode *right;
-    unsigned char symbol;
-  };
 
   void FindCodes(TNode *node, Code cur_value);
 
@@ -72,7 +70,7 @@ class PrefixTree {
     }
   };
 
-  TNode *root_;
+  TNodePtr root_;
 
   // symbol and its frequency
   Record *values_;
