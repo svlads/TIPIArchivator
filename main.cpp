@@ -129,7 +129,15 @@ int main(int argc, char *argv[]) {
       char *filename = argv[i];
       std::string name(filename);
       FILE *fp = fopen(filename, "rb");
+      if (fp == nullptr) {
+        perror("fopen");
+        exit(1);
+      }
       FILE *out = fopen((name + "orig").c_str(), "wb");
+      if (out == nullptr) {
+        perror("fopen");
+        exit(1);
+      }
 
       PrefixTree tree;
 

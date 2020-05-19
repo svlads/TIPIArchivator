@@ -76,8 +76,8 @@ void PrefixTree::FindCodes(TNode* node, Code cur_value) {
 }
 
 void PrefixTree::ReadTree(FILE *fp) {
-  size_t code_size;
-  fread(&code_size, 4, 1, fp);
+  uint32_t code_size = 0;
+  size_t got = fread(&code_size, 4, 1, fp);
   unsigned char leafs[256];
   fread(leafs, 1, code_size / 2 + 1, fp);
   size_t cur_leaf = 0;
