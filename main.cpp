@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
     }
   } else if (strcmp(argv[1], "decode") == 0) {
     for (int i = 2; i < argc; ++i) {
-      char *filename = argv[2];
+      char *filename = argv[i];
       std::string name(filename);
       FILE *fp = fopen(filename, "rb");
       FILE *out = fopen((name + "orig").c_str(), "wb");
